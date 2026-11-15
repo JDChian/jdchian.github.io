@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Project · Duen-Chian Jheng</title>
+  <script src="assets/theme.js"></script>
+  <script src="assets/data.js"></script>
+  <link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+  <nav id="nav"></nav>
+
+  <main class="container detail" id="detail"></main>
+
+  <footer><div class="container">© <span id="year"></span> Duen-Chian Jheng · Built with GitHub Pages</div></footer>
+
+  <script>
+    document.getElementById("nav").innerHTML = navHTML(false);
+    document.getElementById("year").textContent = new Date().getFullYear();
+
+    const id = new URLSearchParams(location.search).get("id");
+    const idx = PROJECTS.findIndex(p => p.id === id);
+    const root = document.getElementById("detail");
+
+    if (idx === -1) {
+      root.innerHTML = '<a class="back" href="index.html#projects">← Back to projects</a><h1>Project not found</h1>';
+    } else {
+      const p = PROJECTS[idx];
+      document.title = p.title + " · " + PROFILE.name;
+      const prev = PROJECTS[idx - 1], next = PROJECTS[idx + 1];
+      root.innerHTML = `
+        <a class="back" href="index.html#projects">← Back to projects</a>
+        <div class="thumb">${thumbHTML(p)}</div>
+        <div class="category">${esc(p.category)}</div>
+        <h1>${esc(p.title)}</h1>
+        <div class="info">${esc(p.period)}<br>${esc(p.context)}</div>
+        <div class="tags">${p.tags.map(t => `<span class="tag">${esc(t)}</span>`).join("")}</div>
+        ${p.links.length ? `<div class="links" style="margin:0 0 8px">${p.links.map(l =>
+          `<a class="btn primary" href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.label)} ↗</a>`).join("")}</div>` : ""}
+        <h2>Overview</h2>
+        <p>${esc(p.overview)}</p>
+        ${p.highlights.length ? `<h2>What I did</h2>
+          <ul class="highlights">${p.highlights.map(h => `<li>${esc(h)}</li>`).join("")}</ul>` : ""}
+        <div class="pager">
+          ${prev ? `<a href="project.html?id=${encodeURIComponent(prev.id)}"><span class="label">← Previous</span>${esc(prev.title)}</a>` : "<span></span>"}
+          ${next ? `<a href="project.html?id=${encodeURIComponent(next.id)}" style="text-align:right"><span class="label">Next →</span>${esc(next.title)}</a>` : "<span></span>"}
+        </div>`;
+    }
+  </script>
+</body>
+</html>
