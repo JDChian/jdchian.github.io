@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JDChian · Portfolio</title>
+  <meta name="description" content="JDChian 的個人作品集" />
+  <style>
+    :root {
+      --bg: #0e1116;
+      --surface: #161b22;
+      --border: #2a313c;
+      --text: #e6edf3;
+      --muted: #8b949e;
+      --accent: #58a6ff;
+      --radius: 14px;
+    }
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #fafbfc;
+        --surface: #ffffff;
+        --border: #e1e4e8;
+        --text: #1f2328;
+        --muted: #59636e;
+        --accent: #0969da;
+      }
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .container { max-width: 960px; margin: 0 auto; padding: 0 24px; }
+
+    /* Nav */
+    nav {
+      position: sticky; top: 0; z-index: 10;
+      background: color-mix(in srgb, var(--bg) 85%, transparent);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--border);
+    }
+    nav .container { display: flex; justify-content: space-between; align-items: center; height: 60px; }
+    nav .logo { font-weight: 700; color: var(--text); }
+    nav ul { list-style: none; display: flex; gap: 24px; }
+    nav ul a { color: var(--muted); }
+    nav ul a:hover { color: var(--text); text-decoration: none; }
+
+    /* Hero */
+    .hero { padding: 96px 0 72px; }
+    .hero .hi { color: var(--accent); font-weight: 600; margin-bottom: 8px; }
+    .hero h1 { font-size: clamp(2.2rem, 6vw, 3.4rem); line-height: 1.2; margin-bottom: 16px; }
+    .hero p { color: var(--muted); max-width: 600px; font-size: 1.1rem; }
+    .hero .links { margin-top: 28px; display: flex; gap: 12px; flex-wrap: wrap; }
+    .btn {
+      display: inline-block; padding: 10px 20px; border-radius: 999px;
+      border: 1px solid var(--border); color: var(--text); font-weight: 500;
+    }
+    .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .btn:hover { text-decoration: none; opacity: .85; }
+
+    /* Sections */
+    section { padding: 56px 0; }
+    section h2 { font-size: 1.6rem; margin-bottom: 24px; }
+
+    /* Projects */
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+    .card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+      overflow: hidden; display: flex; flex-direction: column;
+      transition: transform .15s ease, border-color .15s ease;
+    }
+    .card:hover { transform: translateY(-3px); border-color: var(--accent); }
+    .card .thumb {
+      aspect-ratio: 16 / 9; background: linear-gradient(135deg, var(--accent), #a371f7);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 2rem; font-weight: 700;
+    }
+    .card .thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .card .body { padding: 18px 20px 20px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
+    .card h3 { font-size: 1.15rem; }
+    .card p { color: var(--muted); font-size: .95rem; flex: 1; }
+    .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+    .tag {
+      font-size: .78rem; padding: 2px 10px; border-radius: 999px;
+      background: color-mix(in srgb, var(--accent) 15%, transparent); color: var(--accent);
+    }
+    .card .actions { display: flex; gap: 16px; font-size: .92rem; }
+
+    /* Skills */
+    .skills { display: flex; flex-wrap: wrap; gap: 10px; }
+    .skills span {
+      padding: 6px 14px; border: 1px solid var(--border); border-radius: 999px;
+      background: var(--surface); font-size: .92rem;
+    }
+
+    footer { padding: 40px 0; border-top: 1px solid var(--border); color: var(--muted); font-size: .9rem; text-align: center; }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="container">
+      <a href="#" class="logo">JDChian</a>
+      <ul>
+        <li><a href="#projects">Projects</a></li>
+        <li><a href="#skills">Skills</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <header class="hero container">
+    <p class="hi">Hi, 我是</p>
+    <h1>JDChian</h1>
+    <!-- TODO: 改成你的自我介紹 -->
+    <p>一句話介紹你自己：你是誰、專注在什麼領域、喜歡解決什麼樣的問題。</p>
+    <div class="links">
+      <a class="btn primary" href="#projects">看看我的作品</a>
+      <a class="btn" href="https://github.com/JDChian" target="_blank" rel="noopener">GitHub</a>
+    </div>
+  </header>
+
+  <section id="projects">
+    <div class="container">
+      <h2>Projects</h2>
+      <div class="grid" id="project-grid"></div>
+    </div>
+  </section>
+
+  <section id="skills">
+    <div class="container">
+      <h2>Skills</h2>
+      <div class="skills" id="skill-list"></div>
+    </div>
+  </section>
+
+  <section id="contact">
+    <div class="container">
+      <h2>Contact</h2>
+      <!-- TODO: 換成你的聯絡方式 -->
+      <p>歡迎透過 <a href="https://github.com/JDChian" target="_blank" rel="noopener">GitHub</a> 聯絡我。</p>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">© <span id="year"></span> JDChian · Built with GitHub Pages</div>
+  </footer>
+
+  <script>
+    // ===== 在這裡編輯你的專案 =====
+    // image: 可以放截圖路徑（例如 "images/project1.png"），留空會顯示漸層色塊
+    // repo / demo: 留空就不會顯示該連結
+    const projects = [
+      {
+        title: "Project One",
+        description: "簡單說明這個專案解決了什麼問題、你負責了什麼、有什麼成果。",
+        tags: ["Python", "Flask"],
+        image: "",
+        repo: "https://github.com/JDChian",
+        demo: ""
+      },
+      {
+        title: "Project Two",
+        description: "簡單說明這個專案解決了什麼問題、你負責了什麼、有什麼成果。",
+        tags: ["JavaScript", "React"],
+        image: "",
+        repo: "https://github.com/JDChian",
+        demo: ""
+      },
+      {
+        title: "Project Three",
+        description: "簡單說明這個專案解決了什麼問題、你負責了什麼、有什麼成果。",
+        tags: ["C++"],
+        image: "",
+        repo: "https://github.com/JDChian",
+        demo: ""
+      }
+    ];
+
+    // ===== 在這裡編輯你的技能 =====
+    const skills = ["Python", "JavaScript", "Git", "Linux"];
+
+    // ----- 以下不需要修改 -----
+    const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+    document.getElementById("project-grid").innerHTML = projects.map(p => `
+      <article class="card">
+        <div class="thumb">${p.image ? `<img src="${esc(p.image)}" alt="${esc(p.title)}" loading="lazy">` : esc(p.title.charAt(0))}</div>
+        <div class="body">
+          <h3>${esc(p.title)}</h3>
+          <p>${esc(p.description)}</p>
+          <div class="tags">${p.tags.map(t => `<span class="tag">${esc(t)}</span>`).join("")}</div>
+          <div class="actions">
+            ${p.repo ? `<a href="${esc(p.repo)}" target="_blank" rel="noopener">Code →</a>` : ""}
+            ${p.demo ? `<a href="${esc(p.demo)}" target="_blank" rel="noopener">Demo →</a>` : ""}
+          </div>
+        </div>
+      </article>`).join("");
+
+    document.getElementById("skill-list").innerHTML = skills.map(s => `<span>${esc(s)}</span>`).join("");
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
