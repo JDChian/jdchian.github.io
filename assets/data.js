@@ -2,6 +2,9 @@
 //  網站所有內容都在這個檔案，改這裡就好
 //  每個 project 的 id 會變成網址：project.html?id=<id>
 //  image：放截圖路徑（例如 "images/smpl.png"），留空會顯示漸層色塊
+//  sections（選填）：詳細頁的段落，每段可有 title / subtitle / body / media
+//    body 的每一項是一個段落，可以用 <b>、<code> 等簡單 HTML
+//    media 的 src 是 .mp4 會自動播放影片（同名 .poster.jpg 當預覽圖），其他當圖片
 // =============================================================
 
 const PROFILE = {
@@ -53,20 +56,148 @@ const PROJECTS = [
     links: [],
   },
   {
-    id: "smpl-texture",
-    title: "SMPL Texture Generation from Uncalibrated Multi-View Images",
-    short: "Multi-view texture pipeline that turns photos into realistic, animatable SMPL avatars.",
+    id: "humanpro",
+    title: "HumanPro: An Integrated System for 3D Human Reconstruction",
+    short:
+      "Reconstructs people as point clouds or animatable SMPL-X avatars with strand-based hair. I built Texturify, the multi-view texture pipeline.",
     category: "Research",
     period: "Feb. 2024 – Dec. 2024",
     context: "Undergraduate Research Project · Honorable Mention",
-    tags: ["Python", "Computer Graphics", "3D Avatars"],
-    image: "",
+    team: "李品萱, 鄭敦謙 (Duen-Chian Jheng), 蔡承翰",
+    tags: ["Python", "SMPL-X", "Computer Graphics", "Azure Kinect", "Unity", "Blender"],
+    image: "images/humanpro/cover.jpg",
     overview:
-      "An undergraduate research project (Honorable Mention) that generates UV textures for SMPL human meshes from uncalibrated multi-view images.",
+      "HumanPro reconstructs real people as 3D characters for immersive applications. It supports three representations: colored point clouds for realistic detail, SMPL-X meshes with texture maps that game engines can animate, and strand-based hair models with realistic physics.",
+    // 「My Contribution」區塊
     highlights: [
-      "Built a multi-view texture generation pipeline using camera projection, visibility determination, and UV texture mapping.",
-      "Designed a normal-based blending algorithm to merge textures across viewpoints.",
-      "Reduced color discontinuities between views, producing realistic, animatable 3D avatars.",
+      "Built Texturify, the pipeline that turns a phone video of a person in T-pose into a complete SMPL-X texture map.",
+      "Fitted SMPL-X to each frame with SMPLify-X, projected the mesh onto the image, resolved visibility with the painter's algorithm, and sampled colors through UV texture mapping.",
+      "Designed a normal-based blending algorithm to merge textures from multiple viewpoints, which reduced color seams between views.",
+      "Filled holes in the texture map with BFS-based inpainting and refined skin regions toward an average skin color for consistent lighting.",
+    ],
+    sections: [
+      {
+        title: "Motivation",
+        body: [
+          "3D human reconstruction is a core problem in both computer vision and computer graphics. Imagine recreating a boxing match in VR that viewers can watch from a first- or third-person view. Athletes rendered with generic models look artificial, while avatars built from their real appearance make the experience much more immersive.",
+        ],
+        media: [
+          { src: "images/humanpro/s02_background_vr_boxing.jpg", caption: "Example application: a boxing match recreated in VR" },
+          { src: "images/humanpro/s03_three_representations.jpg", caption: "Three representations: 3D point cloud, SMPL-X mesh with texture map, and strand-based hair" },
+        ],
+      },
+      {
+        title: "System Overview",
+        body: [
+          "HumanPro offers two modeling pipelines for different scenarios. <b>Method I (Studio Photography)</b> captures a person with 8 calibrated RGB-D cameras and reconstructs a colored point cloud. <b>Method II (Lightweight Modeling)</b> needs only a phone video of the user in T-pose turning in place. Texturify generates the SMPL-X texture map and HairStep generates the hair model, so every user can quickly get a personalized avatar.",
+        ],
+        media: [{ src: "images/humanpro/s04_system_overview.jpg", caption: "HumanPro pipeline: Studio Photography (left) and Lightweight Modeling (right)" }],
+      },
+      {
+        title: "Method I · Studio Photography",
+        subtitle: "Camera Calibration",
+        body: [
+          "The studio uses 8 Azure Kinect cameras arranged in a circle. An ArUco cube placed at the center defines the world origin, and each camera estimates its extrinsic parameters by detecting the cube in its RGB image.",
+          "Errors in building the cube and detecting it make these initial extrinsics imprecise. To refine them, adjacent camera pairs capture a chessboard, collect depth at the corner points, and align the two point sets with ICP. This produces much more accurate extrinsics.",
+        ],
+        media: [
+          { src: "images/humanpro/s16_studio_hardware_setup.jpg", caption: "Hardware setup: 8 Azure Kinect cameras" },
+          { src: "images/humanpro/s06_calibration_pipeline.jpg", caption: "Calibration: ArUco cube for initial camera poses, then chessboard + ICP refinement" },
+        ],
+      },
+      {
+        subtitle: "Chessboard ICP",
+        media: [
+          { src: "images/humanpro/s17_chessboard_photo.jpg", caption: "Chessboard capture" },
+          { src: "images/humanpro/s17_icp_initial_extrinsic.jpg", caption: "Initial extrinsic result" },
+          { src: "images/humanpro/s17_icp_align_point0.jpg", caption: "Align point 0" },
+          { src: "images/humanpro/s17_icp_result.jpg", caption: "ICP result" },
+        ],
+      },
+      {
+        subtitle: "Reconstruction Results",
+        body: [
+          "With calibrated extrinsics and known intrinsics, color and depth from all cameras are fused into a colored point cloud. Second-pass ICP calibration clearly fixes the misalignment between views.",
+        ],
+        media: [
+          { src: "images/humanpro/s07_pointcloud_multiview.jpg", caption: "Colored point cloud rendered from three viewpoints, next to the color image" },
+          { src: "images/humanpro/s08_icp_before_after.jpg", caption: "Before vs. after ICP refinement" },
+        ],
+      },
+      {
+        title: "Method II · Lightweight Modeling",
+        body: [
+          "The lightweight pipeline has two parts: <b>Texturify</b> builds the body texture, and the <b>Hair Editing System</b> builds an editable hair model.",
+        ],
+      },
+      {
+        subtitle: "Texturify: Single-View Texture Extraction",
+        mine: true,
+        body: [
+          "Starting from frames of a T-pose video, SMPLify-X estimates the SMPL-X vertex positions and camera extrinsics so the body model fits the person in the photo. The fitted mesh is projected onto the image, the painter's algorithm keeps only frontal surfaces, and texture mapping samples the person's colors into UV space.",
+        ],
+        media: [
+          { src: "images/humanpro/s10_input_tpose_front.jpg", caption: "Input frame" },
+          { src: "images/humanpro/s10_smplifyx_fitting.mp4", caption: "SMPLify-X fitting" },
+          { src: "images/humanpro/s10_texture_mapping_projection.jpg", caption: "Projection and texture mapping into UV space" },
+        ],
+      },
+      {
+        subtitle: "Texturify: Multi-View Normal-Based Blending",
+        mine: true,
+        body: [
+          "A single view covers only part of the body, so Texturify repeats the extraction for frames from multiple viewpoints and merges them. Each face is weighted by <code>max(cos(N · V), 0)</code>, where N is the face normal and V is the camera's view direction. Pixels that face the camera directly therefore get the most weight.",
+          "After blending, holes left in the texture map are filled with a BFS-based inpainting step. Skin regions often look different under different lighting, so they are segmented and blended with the average skin color. The result is a complete, high-fidelity texture map.",
+        ],
+        media: [
+          { src: "images/humanpro/s18_normal_blending_formula.jpg", caption: "Normal-based blending: per-view textures weighted by normalized normal maps" },
+          { src: "images/humanpro/s19_inpainting_skin_refine.jpg", caption: "Inpainting → skin color refining" },
+          { src: "images/humanpro/s20_average_blending.jpg", caption: "Average blending" },
+          { src: "images/humanpro/s20_normal_based_blending.jpg", caption: "Normal-based blending (sharper, fewer seams)" },
+        ],
+      },
+      {
+        subtitle: "Hair Editing System",
+        body: [
+          "Hair is generated with HairStep (CVPR 2023), a deep-learning model that predicts strand-based 3D hair from a single image. The output strands are converted into a hair particle system that Unity and Blender can use directly. A custom UI lets users change hair color and cut the hair to the length they want.",
+        ],
+        media: [
+          { src: "images/humanpro/s12_hair_editing_ui.mp4", caption: "Hair editing UI: color selection" },
+          { src: "images/humanpro/s12_hair_cutting.mp4", caption: "Hair cutting" },
+          { src: "images/humanpro/s23_hair_particles_unity.jpg", caption: "Hair particle system in Unity" },
+          { src: "images/humanpro/s23_hair_particles_blender.jpg", caption: "Hair particle system in Blender" },
+        ],
+      },
+      {
+        title: "Results",
+        body: [
+          "The final avatars combine the SMPL-X mesh, the Texturify texture map and the hair model, animated with a dance sequence in Unity. The hair moves with realistic physics, which makes the characters look more lively.",
+        ],
+        media: [
+          { src: "images/humanpro/s13_result_dance_male.mp4", caption: "Demo 1 in Unity" },
+          { src: "images/humanpro/s13_result_dance_female.mp4", caption: "Demo 2 in Unity" },
+        ],
+      },
+      {
+        subtitle: "Demo Case 1",
+        media: [
+          { src: "images/humanpro/s10_input_tpose_front.jpg", caption: "Input (front)" },
+          { src: "images/humanpro/s21_demo1_input_back.jpg", caption: "Input (back)" },
+          { src: "images/humanpro/s21_demo1_texture_map.jpg", caption: "Generated texture map" },
+          { src: "images/humanpro/s21_demo1_model_front.jpg", caption: "Textured model (front)" },
+          { src: "images/humanpro/s21_demo1_model_back.jpg", caption: "Textured model (back)" },
+        ],
+      },
+      {
+        subtitle: "Demo Case 2",
+        media: [
+          { src: "images/humanpro/s22_demo2_input_front.jpg", caption: "Input (front)" },
+          { src: "images/humanpro/s22_demo2_input_back.jpg", caption: "Input (back)" },
+          { src: "images/humanpro/s22_demo2_texture_map.jpg", caption: "Generated texture map" },
+          { src: "images/humanpro/s22_demo2_model_front.jpg", caption: "Textured model (front)" },
+          { src: "images/humanpro/s22_demo2_model_back.jpg", caption: "Textured model (back)" },
+        ],
+      },
     ],
     links: [],
   },

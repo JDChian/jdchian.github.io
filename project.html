@@ -13,11 +13,37 @@
 
   <main class="container detail" id="detail"></main>
 
+  <div id="lightbox" onclick="this.classList.remove('open')"><img alt=""><p></p></div>
+
   <footer><div class="container">© <span id="year"></span> Duen-Chian Jheng · Built with GitHub Pages</div></footer>
 
   <script>
     document.getElementById("nav").innerHTML = navHTML(false);
     document.getElementById("year").textContent = new Date().getFullYear();
+
+    function mediaHTML(m) {
+      const cap = m.caption ? `<figcaption>${esc(m.caption)}</figcaption>` : "";
+      if (/\.mp4$/i.test(m.src)) {
+        const poster = m.src.replace(/\.mp4$/i, ".poster.jpg");
+        return `<figure><video src="${esc(m.src)}" poster="${esc(poster)}" autoplay muted loop playsinline preload="metadata"></video>${cap}</figure>`;
+      }
+      return `<figure><img src="${esc(m.src)}" alt="${esc(m.caption || "")}" loading="lazy" onclick="openLightbox(this)">${cap}</figure>`;
+    }
+    function sectionHTML(s) {
+      const n = (s.media || []).length;
+      return `<div class="section${s.mine ? " mine" : ""}">
+        ${s.title ? `<h2>${esc(s.title)}</h2>` : ""}
+        ${s.subtitle ? `<h3>${esc(s.subtitle)}${s.mine ? ' <span class="badge">My work</span>' : ""}</h3>` : ""}
+        ${(s.body || []).map(b => `<p>${b}</p>`).join("")}
+        ${n ? `<div class="media-grid n${Math.min(n, 3)}">${s.media.map(mediaHTML).join("")}</div>` : ""}
+      </div>`;
+    }
+    function openLightbox(img) {
+      const lb = document.getElementById("lightbox");
+      lb.querySelector("img").src = img.src;
+      lb.querySelector("p").textContent = img.alt;
+      lb.classList.add("open");
+    }
 
     const id = new URLSearchParams(location.search).get("id");
     const idx = PROJECTS.findIndex(p => p.id === id);
@@ -34,14 +60,16 @@
         <div class="thumb">${thumbHTML(p)}</div>
         <div class="category">${esc(p.category)}</div>
         <h1>${esc(p.title)}</h1>
-        <div class="info">${esc(p.period)}<br>${esc(p.context)}</div>
+        <div class="info">${esc(p.period)}<br>${esc(p.context)}${p.team ? `<br>Team: ${esc(p.team)}` : ""}</div>
         <div class="tags">${p.tags.map(t => `<span class="tag">${esc(t)}</span>`).join("")}</div>
         ${p.links.length ? `<div class="links" style="margin:0 0 8px">${p.links.map(l =>
           `<a class="btn primary" href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.label)} ↗</a>`).join("")}</div>` : ""}
         <h2>Overview</h2>
         <p>${esc(p.overview)}</p>
-        ${p.highlights.length ? `<h2>What I did</h2>
-          <ul class="highlights">${p.highlights.map(h => `<li>${esc(h)}</li>`).join("")}</ul>` : ""}
+        ${p.highlights.length ? (p.sections
+          ? `<div class="contrib"><h3>My Contribution</h3><ul class="highlights">${p.highlights.map(h => `<li>${esc(h)}</li>`).join("")}</ul></div>`
+          : `<h2>What I did</h2><ul class="highlights">${p.highlights.map(h => `<li>${esc(h)}</li>`).join("")}</ul>`) : ""}
+        ${(p.sections || []).map(sectionHTML).join("")}
         <div class="pager">
           ${prev ? `<a href="project.html?id=${encodeURIComponent(prev.id)}"><span class="label">← Previous</span>${esc(prev.title)}</a>` : "<span></span>"}
           ${next ? `<a href="project.html?id=${encodeURIComponent(next.id)}" style="text-align:right"><span class="label">Next →</span>${esc(next.title)}</a>` : "<span></span>"}
